@@ -19,7 +19,7 @@ router.get("/:id", async (req, res) => {
     try {
         const [entry] = await db
         .select()
-        .from("books2")
+        .from(books)
         .where(eq(books.id, +req.params.id))
 
         if (!entry)
@@ -30,7 +30,40 @@ router.get("/:id", async (req, res) => {
     } catch (err) {
         return renderErrorHandler(err, res);
     }
-})
+});
+
+router.post("/", async (req, res) => {
+    try {
+        const { title, author, year } = req.body;
+        
+        if (!title)
+            return res.status(404).json({
+            message: "The title field is required!"
+        });
+
+        if (!author)
+            return res.status(404).json({
+            message: "The author field is required!"
+        });
+
+            if (year > new Date().getFullYear())
+            return res.status(404).json({
+            message: "The year field is required!"
+        });
+
+        await db.insert(books).values({
+            title: title,
+            author: author,
+            year: year,
+        })
+
+        return res.status(201).json({
+            message: "Book created successfully!"
+        });
+    } catch (err) {
+        return renderErrorHandler(err, res);
+    }
+});
 
 
 
